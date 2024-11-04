@@ -1,1 +1,4 @@
-{}
+{
+  "particle.firmwareVersion": "6.1.1",
+  "particle.targetPlatform": "boron"
+}
