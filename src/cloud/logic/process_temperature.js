@@ -1,6 +1,7 @@
 import Particle from 'particle:core';
+import { getUnixTime } from 'vendor:date-fns';
 
-export default async function convertTemperatureToFarenheit({ event }) {
+export default async function convertTemperatureToFahrenheit({ event }) {
   let data;
 
   // Log the incoming event data for troubleshooting
@@ -20,7 +21,7 @@ export default async function convertTemperatureToFarenheit({ event }) {
     throw err;
   }
 
-  //check we have two fields, temperatureInC and humidity
+  // Check we have two fields, temperatureInC and humidity
   if (!data.temperatureInC || !data.humidity) {
     console.error("Missing required fields in eventData", data);
     return
@@ -32,15 +33,15 @@ export default async function convertTemperatureToFarenheit({ event }) {
   // Log the converted temperature for troubleshooting
   console.log("Converted temperature:", temperatureInF);
 
-  // store in ledger in fareheit
+  // Store in ledger in Fahrenheit
   const envDataLedger = Particle.ledger("env-data", { deviceId: event.deviceId });
   let { data: tsLedger } = envDataLedger.get();
 
   // Make sure we have an object to write to
   // Note: Ledger instances that don't exist yet return a valid object and
-  // upon running set() they will be created. 
+  // upon running set() they will be created.
   tsLedger.log = tsLedger.log || []
-  
+
   const convertedEnvReading = JSON.stringify({
     temperatureInF,
     humidity: data.humidity
@@ -54,7 +55,7 @@ export default async function convertTemperatureToFarenheit({ event }) {
   tsLedger.log.push(entry);
 
   // Only keep the last 1 hour of entries as that is all we ever need
-  //at 10 seconds per entry, that is 360 entries
+  // at 10 seconds per entry, that is 360 entries
   while (tsLedger.log.length > 360) {
     let dropped = tsLedger.log.shift();
     console.log(`Ledger oversize. Drop entry from ${dropped.ts}`);
@@ -65,13 +66,14 @@ export default async function convertTemperatureToFarenheit({ event }) {
 
   // Pull the setpoint from the configuration document store
   const configLedger = Particle.ledger("configuration");
-  let { data: temperatureSetPointInF } = configLedger.get();
+  const configData = configLedger.get();
+  const temperatureSetPointInF = configData.temperatureSetPointInF;
 
-  //if the setpoint is breached, we need to trigger the alarm
-  //this goes into an SMS so has to fit in 200 chars
+  // If the setpoint is breached, we need to trigger the alarm
+  // This goes into an SMS so has to fit in 200 chars
   if (temperatureInF > temperatureSetPointInF) {
     Particle.publish("alarm", JSON.stringify({
       message: "Temperature exceeded the setpoint for device" + event.deviceId + " at " + new Date().toISOString() + " with temperature " + temperatureInF
     }));
-  }  
+  }
 }
