@@ -42,7 +42,7 @@ void sampleCallback(DHTSample sample) {
       Log.info("Sending the data to the cloud...");
       
       //create a JSON object that contains the temperature and humidity using the JSON helper
-      char data[256];
+      char data[256] = {0};
       JSONBufferWriter writer(data, sizeof(data));
       writer.beginObject();
       writer.name("temperatureInC").value(sample.getTempC());
