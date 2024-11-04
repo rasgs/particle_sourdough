@@ -1,0 +1,19 @@
+id: particle/environmental-monitoring
+category: tutorial
+icon: particle.png
+gitrepo: https://github.com/particle-iot/environmental-monitoring-tutorial
+name: "Environmental Monitoring Tutorial inc Cloud Storage and Alerting"
+shortDescription: CREATE
+version: 1.0.1
+models: []
+language: [ "Particle Wiring", "JavaScript" ]
+cloudServices: [ "Ledger", "Logic", "Integrations", "Vault" ]
+hardwareDependencies:
+  - name: Particle Feather based MCU Development Boards (e.g., Argon, Boron)
+    link: https://store.particle.io/collections/all-products?filter.p.product_type=Development%20Boards
+  - name: Grove Temperature & Humidity Sensor (DHT11)
+    link: https://wiki.seeedstudio.com/Grove-TemperatureAndHumidity_Sensor/
+  - name: Particle Grove Shield
+    link: https://docs.particle.io/reference/datasheets/accessories/gen3-accessories/
+description: |
+  This Environmental Monitoring Tutorial demonstrates how to use the Seeed Studio Grove Temperature & Humidity Sensor with a Particle device to measure and publish temperature and humidity data to the cloud. The cloud converts Celsius readings to Fahrenheit, stores data in Ledger, and triggers alerts based on user-defined temperature thresholds.

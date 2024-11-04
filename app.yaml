@@ -1,0 +1,32 @@
+application:
+  name: "environmental-monitoring-tutorial"
+  version: "1.0.2"
+  description: "Environmental monitoring tutorial"
+
+firmware:
+  target: [ gen3 ]
+  assets: [ ]
+  
+cloud:
+  logic:
+    - name: "Process Environmental Data"
+      function: process_temperature.js
+      scope: product
+  ledger:
+    - name: "Configuration"
+      shortName: configuration
+      scope: org
+      defaults: "{ setpoint: 85.0 }"
+  integrations:
+    - name: "SMS Alerts"
+      type: "twilio"
+      template: "custom"
+      trigger: "alarm"
+      url: "api.twilio.com"
+      requestType: "POST"
+      twilio:
+        accountSID: 24235234234
+        accountUsername: mrlambchop
+        accountPassword: "$VAULT.TWILIO_PASSWORD"
+  vault:
+    secret: "TWILIO_PASSWORD"  # Vault-managed password for secure access
