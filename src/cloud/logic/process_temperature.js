@@ -67,13 +67,17 @@ export default async function convertTemperatureToFahrenheit({ event }) {
   // Pull the setpoint from the configuration document store
   const configLedger = Particle.ledger("configuration");
   const configData = configLedger.get();
-  const temperatureSetPointInF = configData.temperatureSetPointInF;
+  const temperatureSetPointInF = configData.data.temperatureSetPointInF;
 
   // If the setpoint is breached, we need to trigger the alarm
   // This goes into an SMS so has to fit in 200 chars
   if (temperatureInF > temperatureSetPointInF) {
-    Particle.publish("alarm", JSON.stringify({
+    console.log("Temperature exceeded the setpoint");
+    const payload = JSON.stringify({
       message: "Temperature exceeded the setpoint for device" + event.deviceId + " at " + new Date().toISOString() + " with temperature " + temperatureInF
-    }));
+    });
+    Particle.publish("alarm", payload, { productId: 33703 });
+  } else {
+    console.log("Temperature is within the setpoint");
   }
 }
