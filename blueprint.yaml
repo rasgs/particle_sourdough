@@ -1,9 +1,9 @@
 id: particle/environmental-monitoring
 category: tutorial
 icon: particle.png
-gitrepo: https://github.com/particle-iot/environmental-monitoring-tutorial
-name: "Environmental Monitoring Tutorial inc Cloud Storage and Alerting"
-shortDescription: CREATE
+gitrepo: https://github.com/particle-iot/blueprint-environmental-monitoring-tutorial
+name: "Environmental monitoring tutorial"
+shortDescription: A tutorial for measuring and storing environmental data with Particle devices
 version: 1.0.1
 models: []
 integrations: []
@@ -18,4 +18,8 @@ hardwareDependencies:
   - name: Particle Grove Shield
     link: https://docs.particle.io/reference/datasheets/accessories/gen3-accessories/
 description: |
-  This Environmental Monitoring Tutorial demonstrates how to use the Seeed Studio Grove Temperature & Humidity Sensor with a Particle device to measure and publish temperature and humidity data to the cloud. The cloud converts Celsius readings to Fahrenheit, stores data in Ledger, and triggers alerts based on user-defined temperature thresholds.
+  This tutorial demonstrates how to use a Particle device with a Grove Temperature & Humidity Sensor to collect, convert, and store temperature and humidity data in the cloud. The firmware publishes temperature and humidity readings every 10 seconds, with automatic conversion in the cloud from Celsius to Fahrenheit and data storage in the Ledger time-series database.
+
+  Designed for real-time monitoring, this tutorial is ideal for applications in smart homes, greenhouses, and industrial monitoring. By setting a temperature threshold, users can trigger alerts when temperatures exceed predefined limits, providing responsive insights for sensitive environments.
+
+  This project introduces essential IoT skills, including sensor integration, data publishing, and cloud-based data processing and alerting. It is a practical example for users looking to learn about environmental monitoring and real-time cloud integration with Particle devices.
