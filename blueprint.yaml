@@ -6,6 +6,7 @@ name: "Environmental Monitoring Tutorial inc Cloud Storage and Alerting"
 shortDescription: CREATE
 version: 1.0.1
 models: []
+integrations: []
 language: [ "Particle Wiring", "JavaScript" ]
 cloudServices: [ "Ledger", "Logic", "Integrations", "Vault" ]
 hardwareDependencies:
