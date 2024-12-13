@@ -1,25 +1,48 @@
 id: particle/environmental-monitoring
-category: tutorial
-icon: particle.png
+slug: particle-environmental-monitoring
+type: tutorial
+category: "Sensors and data collection"
+expertiseLevel: ""
+tags: ["environmental", "monitoring"]
+icon: assets/particle-logo.svg
 gitrepo: https://github.com/particle-iot/blueprint-environmental-monitoring-tutorial
 name: "Environmental monitoring tutorial"
 shortDescription: A tutorial for measuring and storing environmental data with Particle devices
 version: 1.0.1
 models: []
-integrations: []
 language: [ "Particle Wiring", "JavaScript" ]
-cloudServices: [ "Ledger", "Logic", "Integrations", "Vault" ]
+cloudServices: 
+  - name: Ledger
+  - name: Logic
+  - name: Integrations
+  - name: Vault
+integrations: []
+supportedDevices:
+  - name: Boron
+  - name: Argon
+  - name: M-SoM
+  - name: Photon 2
+  - name: Muon
+  - name: Monitor One
+  - name: Tracker One
+  - name: T-SoM
+  - name: E-SoM
+  - name: P2
 hardwareDependencies:
-  - name: Particle MCU Development Board
-    link: https://store.particle.io/collections/all-products?filter.p.product_type=Development%20Boards
-    tags: [ "Boron", "Argon", "M-SoM", "Photon 2", "Muon", "Monitor One", "Tracker One", "T-SoM", "E-SoM", "P2" ]
+  - name: Supported device
   - name: Grove Temperature & Humidity Sensor (DHT11)
     link: https://wiki.seeedstudio.com/Grove-TemperatureAndHumidity_Sensor/
   - name: Particle Grove Shield
     link: https://docs.particle.io/reference/datasheets/accessories/gen3-accessories/
+introduction: |
+  Welcome to the **Environmental Monitoring Tutorial**! This blueprint demonstrates how to monitor environmental conditions by measuring temperature and humidity using a Particle device with a **Grove Temperature & Humidity Sensor**. Every 10 seconds, the sensor reads temperature and humidity values, publishing this data to the cloud. Once received, the cloud converts the temperature from Celsius to Fahrenheit and stores it in a time-series database (Ledger). Additionally, an alert is triggered if the temperature exceeds a specified threshold set within Ledger.
+
+  This project provides a practical example of IoT-based environmental monitoring, ideal for use cases in smart homes, greenhouses, and industrial monitoring.
 description: |
   This tutorial demonstrates how to use a Particle device with a Grove Temperature & Humidity Sensor to collect, convert, and store temperature and humidity data in the cloud. The firmware publishes temperature and humidity readings every 10 seconds, with automatic conversion in the cloud from Celsius to Fahrenheit and data storage in the Ledger time-series database.
 
   Designed for real-time monitoring, this tutorial is ideal for applications in smart homes, greenhouses, and industrial monitoring. By setting a temperature threshold, users can trigger alerts when temperatures exceed predefined limits, providing responsive insights for sensitive environments.
 
   This project introduces essential IoT skills, including sensor integration, data publishing, and cloud-based data processing and alerting. It is a practical example for users looking to learn about environmental monitoring and real-time cloud integration with Particle devices.
+
+additionalResources:
