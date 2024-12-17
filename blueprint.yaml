@@ -1,9 +1,8 @@
-id: particle/environmental-monitoring
 slug: particle-environmental-monitoring
 type: tutorial
 category: "Sensors and data collection"
-expertiseLevel: ""
-tags: ["environmental", "monitoring"]
+expertiseLevel: "intermediate"
+tags: ["sensors", "monitoring", "alerting", "industrial", "smart home"]
 icon: assets/particle-logo.svg
 gitrepo: https://github.com/particle-iot/blueprint-environmental-monitoring-tutorial
 name: "Environmental monitoring tutorial"
