@@ -14,7 +14,7 @@ cloudServices:
   - name: Ledger
   - name: Logic
   - name: Integrations
-  - name: Vault
+  - name: Secure variables
 integrations: []
 supportedDevices:
   - name: Boron
