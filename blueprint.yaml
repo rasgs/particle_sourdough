@@ -6,7 +6,7 @@ tags: ["Sensors", "Monitoring", "Alerting", "Industrial", "Smart home"]
 icon: assets/environmental-monitoring-tutorial.svg
 gitrepo: https://github.com/particle-iot/blueprint-environmental-monitoring-tutorial
 name: "Environmental monitoring tutorial"
-shortDescription: A tutorial for measuring and storing environmental data with Particle devices
+shortDescription: "A tutorial for measuring and storing environmental data with Particle devices."
 version: 1.0.1
 models: []
 language: [ "Particle Wiring", "JavaScript" ]
