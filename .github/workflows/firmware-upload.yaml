@@ -4,8 +4,8 @@ name: Compile and upload
 # It will only run when a tag is pushed to the repository that matches the pattern "v*"
 on:
   push:
-    tags:
-      - 'v*'
+    branches:
+      - release
 
 jobs:
   compile-release:
