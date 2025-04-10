@@ -7,7 +7,7 @@
 #define VL6180X_ADDRESS 0x29 // Default I2C address for VL6180x
 #define BME_ADDRESS 0x76 // Default I2C address for BME68x
 
-PRODUCT_VERSION(1);
+PRODUCT_VERSION(2);
 
 VL6180x vl6180(VL6180X_ADDRESS);
 SCD30 scd30;
