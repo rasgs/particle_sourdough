@@ -27,12 +27,12 @@ supportedDevices:
   - name: T-SoM
   - name: E-SoM
   - name: P2
-hardwareDependencies:
-  - name: Supported device
-  - name: Grove Temperature & Humidity Sensor (DHT11)
-    link: https://wiki.seeedstudio.com/Grove-TemperatureAndHumidity_Sensor/
-  - name: Particle Grove Shield
-    link: https://docs.particle.io/reference/datasheets/accessories/gen3-accessories/
+# hardwareDependencies:
+#   - name: Supported device
+#   - name: Grove Temperature & Humidity Sensor (DHT11)
+#     link: https://wiki.seeedstudio.com/Grove-TemperatureAndHumidity_Sensor/
+#   - name: Particle Grove Shield
+#     link: https://docs.particle.io/reference/datasheets/accessories/gen3-accessories/
 introduction: |
   Welcome to the **Environmental Monitoring Tutorial**! This blueprint demonstrates how to monitor environmental conditions by measuring temperature and humidity using a Particle device with a **Grove Temperature & Humidity Sensor**. Every 10 seconds, the sensor reads temperature and humidity values, publishing this data to the cloud. Once received, the cloud converts the temperature from Celsius to Fahrenheit and stores it in a time-series database (Ledger). Additionally, an alert is triggered if the temperature exceeds a specified threshold set within Ledger.
 

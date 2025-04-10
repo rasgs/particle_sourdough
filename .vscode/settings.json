@@ -1,4 +1,11 @@
 {
-  "particle.firmwareVersion": "6.1.1",
-  "particle.targetPlatform": "boron"
+  "particle.firmwareVersion": "3.3.1",
+  "particle.targetPlatform": "photon",
+  "particle.targetDevice": "dimsen",
+  "files.associations": {
+    "__hash_table": "cpp",
+    "initializer_list": "cpp",
+    "unordered_map": "cpp",
+    "print": "cpp"
+  }
 }

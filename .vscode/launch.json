@@ -1,0 +1,79 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "cortex-debug",
+            "request": "attach",
+            "servertype": "openocd",
+            "name": "Particle Debugger",
+            "cwd": "${workspaceRoot}",
+            "rtos": "FreeRTOS",
+            "armToolchainPath": "${command:particle.getDebuggerCompilerDir}",
+            "executable": "${command:particle.getDebuggerExecutable}",
+            "serverpath": "${command:particle.getDebuggerOpenocdPath}",
+            "searchDir": [
+                "${command:particle.getDebuggerSearchDir}"
+            ],
+            "configFiles": [
+                "${command:particle.getDebuggerConfigFiles}"
+            ],
+            "postAttachCommands": [
+                "${command:particle.getDebuggerPostAttachCommands}"
+            ],
+            "particle": {
+                "version": "1.1.0",
+                "debugger": "particle-debugger"
+            }
+        },
+        {
+            "type": "cortex-debug",
+            "request": "attach",
+            "servertype": "openocd",
+            "name": "Generic DAPLink Compatible Debugger",
+            "cwd": "${workspaceRoot}",
+            "rtos": "FreeRTOS",
+            "armToolchainPath": "${command:particle.getDebuggerCompilerDir}",
+            "executable": "${command:particle.getDebuggerExecutable}",
+            "serverpath": "${command:particle.getDebuggerOpenocdPath}",
+            "searchDir": [
+                "${command:particle.getDebuggerSearchDir}"
+            ],
+            "configFiles": [
+                "${command:particle.getDebuggerConfigFiles}"
+            ],
+            "postAttachCommands": [
+                "${command:particle.getDebuggerPostAttachCommands}"
+            ],
+            "particle": {
+                "version": "1.1.0",
+                "debugger": "generic-cmsis-dap"
+            }
+        },
+        {
+            "name": "C/C++: g++-14 build and debug active file",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${fileDirname}/${fileBasenameNoExtension}",
+            "args": [],
+            "stopAtEntry": false,
+            "cwd": "${fileDirname}",
+            "environment": [],
+            "externalConsole": false,
+            "MIMode": "lldb",
+            "preLaunchTask": "C/C++: g++-14 build active file"
+        },
+        {
+            "name": "C/C++: g++ build and debug active file",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${fileDirname}/${fileBasenameNoExtension}",
+            "args": [],
+            "stopAtEntry": false,
+            "cwd": "${fileDirname}",
+            "environment": [],
+            "externalConsole": false,
+            "MIMode": "lldb",
+            "preLaunchTask": "C/C++: g++ build active file"
+        }
+    ]
+}
