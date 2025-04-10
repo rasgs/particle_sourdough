@@ -27,6 +27,7 @@ jobs:
           # Allowed values: core, photon, p1, electron, argon, boron, xenon, esomx, bsom, b5som, tracker, trackerm, p2, msom
           particle-platform-name: 'photon'
           device-os-version: '3.3.1'
+          auto-version: true
           particle-access-token: ${{ secrets.PARTICLE_ACCESS_TOKEN }}
 
       # Optional: Upload compiled firmware as an artifact on GitHub.
