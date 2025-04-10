@@ -26,6 +26,8 @@ jobs:
           # Set the particle-platform-name to the platform you're targeting.
           # Allowed values: core, photon, p1, electron, argon, boron, xenon, esomx, bsom, b5som, tracker, trackerm, p2, msom
           particle-platform-name: 'p2'
+          device-os-version: 'latest-lts'
+          particle-access-token: ${{ secrets.PARTICLE_ACCESS_TOKEN }}
 
       # Optional: Upload compiled firmware as an artifact on GitHub.
       - name: Upload Firmware as Artifact
