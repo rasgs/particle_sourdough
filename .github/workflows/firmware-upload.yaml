@@ -32,38 +32,38 @@ jobs:
             ${{ steps.compile.outputs.firmware-path }}
             ${{ steps.compile.outputs.target-path }}
 
-      - name: Commit updated version file
-        id: commit
-        if: steps.compile.outputs.firmware-version-updated == 'true'
-        run: |
-          git config user.name 'github-actions[bot]'
-          git config user.email 'github-actions[bot]@users.noreply.github.com'
-          git commit -m "Update firmware version" -a
-          echo "updated-version-sha=$(git rev-parse HEAD)" >> $GITHUB_OUTPUT
+      # - name: Commit updated version file
+      #   id: commit
+      #   if: steps.compile.outputs.firmware-version-updated == 'true'
+      #   run: |
+      #     git config user.name 'github-actions[bot]'
+      #     git config user.email 'github-actions[bot]@users.noreply.github.com'
+      #     git commit -m "Update firmware version" -a
+      #     echo "updated-version-sha=$(git rev-parse HEAD)" >> $GITHUB_OUTPUT
     
-      # When a GitHub Action pushes commits or tags, it does not trigger a new GitHub Action job
-      - name: Push changes
-        if: steps.compile.outputs.firmware-version-updated == 'true'
-        uses: ad-m/github-push-action@v0.6.0
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          branch: ${{ github.ref }}
+      # # When a GitHub Action pushes commits or tags, it does not trigger a new GitHub Action job
+      # - name: Push changes
+      #   if: steps.compile.outputs.firmware-version-updated == 'true'
+      #   uses: ad-m/github-push-action@v0.6.0
+      #   with:
+      #     github_token: ${{ secrets.GITHUB_TOKEN }}
+      #     branch: ${{ github.ref }}
 
-      - name: Create archive of target directory
-        if: steps.compile.outputs.firmware-version-updated == 'true'
-        run: |
-          tar -czf debug-objects.tar.gz ${{ steps.compile.outputs.target-path }}
+      # - name: Create archive of target directory
+      #   if: steps.compile.outputs.firmware-version-updated == 'true'
+      #   run: |
+      #     tar -czf debug-objects.tar.gz ${{ steps.compile.outputs.target-path }}
 
-      - name: Create GitHub release
-        if: steps.compile.outputs.firmware-version-updated == 'true'
-        uses: ncipollo/release-action@v1
-        with:
-          artifacts: ${{ steps.compile.outputs.firmware-path }},debug-objects.tar.gz
-          generateReleaseNotes: 'true'
-          name: "Firmware v${{ steps.compile.outputs.firmware-version }}"
-          tag: "v${{ steps.compile.outputs.firmware-version }}"
-          commit: ${{ steps.commit.outputs.updated-version-sha }}
-          token: ${{ secrets.GITHUB_TOKEN }}
+      # - name: Create GitHub release
+      #   if: steps.compile.outputs.firmware-version-updated == 'true'
+      #   uses: ncipollo/release-action@v1
+      #   with:
+      #     artifacts: ${{ steps.compile.outputs.firmware-path }},debug-objects.tar.gz
+      #     generateReleaseNotes: 'true'
+      #     name: "Firmware v${{ steps.compile.outputs.firmware-version }}"
+      #     tag: "v${{ steps.compile.outputs.firmware-version }}"
+      #     commit: ${{ steps.commit.outputs.updated-version-sha }}
+      #     token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Upload product firmware to Particle
         uses: particle-iot/firmware-upload-action@v1
