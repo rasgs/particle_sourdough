@@ -7,5 +7,6 @@
     "initializer_list": "cpp",
     "unordered_map": "cpp",
     "print": "cpp"
-  }
+  },
+  "particle.debugWarningShown": true
 }
