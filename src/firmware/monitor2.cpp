@@ -6,6 +6,7 @@
 
 #define VL6180X_ADDRESS 0x29 // Default I2C address for VL6180x
 #define BME_ADDRESS 0x76 // Default I2C address for BME68x
+#define BLYNK_AUTH_TOKEN "dz1SzlRRpOFotqyS5zmmKiDzg0uI62vL"
 
 PRODUCT_ID(1);
 PRODUCT_VERSION(3);
@@ -23,7 +24,7 @@ SerialLogHandler logHandler(LOG_LEVEL_INFO);
 
 // Time variables
 unsigned long previousMillis = 0;
-const unsigned long interval = 5000; // Interval in milliseconds
+const unsigned long interval = 60000; // Interval in milliseconds
 
 // Structure to hold sensor data
 struct SensorData {
@@ -111,7 +112,7 @@ void printData(const SensorData &data) {
 }
 
 // Function to build JSON data and publish via Particle.publish
-void publishData(const SensorData &data) {
+void publishDataJSON(const SensorData &data) {
   char jsonBuffer[512] = {0};
   JSONBufferWriter writer(jsonBuffer, sizeof(jsonBuffer));
   
@@ -140,9 +141,39 @@ void publishData(const SensorData &data) {
     }
   writer.endObject();
 
-  Particle.publish("environmental-data", writer.buffer());
+  Particle.publish("measurement", writer.buffer());
 }
 
+void publishData(const SensorData &data) {
+  char eventData[20] = {0};
+
+  Particle.publish("BLYNK_AUTH_TOKEN", String(BLYNK_AUTH_TOKEN), PRIVATE);
+
+
+  sprintf(eventData, "%.2f", data.vl6180Ambient);
+  Particle.publish("meas_vl6180Ambient", eventData, PRIVATE);
+  sprintf(eventData, "%d", data.vl6180Range);
+  Particle.publish("meas_vl6180Range", eventData, PRIVATE);
+  
+  if (data.scd30Available) {
+    sprintf(eventData, "%.2f", data.scd30CO2);
+    Particle.publish("meas_scd30CO2", eventData, PRIVATE);
+    sprintf(eventData, "%.2f", data.scd30Temp);
+    Particle.publish("meas_scd30Temperature", eventData, PRIVATE);
+    sprintf(eventData, "%.2f", data.scd30Hum);
+    Particle.publish("meas_scd30Humidity", eventData, PRIVATE);
+  }
+
+  if (data.bmeAvailable) {
+    sprintf(eventData, "%.2f", data.bmeTemp);
+    Particle.publish("meas_bme68xTemperature", eventData, PRIVATE);
+    sprintf(eventData, "%.2f", data.bmeHum);
+    Particle.publish("meas_bme68xHumidity", eventData, PRIVATE);
+    sprintf(eventData, "%.2f", data.bmePressure);
+    Particle.publish("meas_bme68xPressure", eventData, PRIVATE);
+    // Particle.publish("bme68xGasResistance", String(data.bmeGasResistance), PRIVATE);
+  }
+}
 
 void setup() {
 
