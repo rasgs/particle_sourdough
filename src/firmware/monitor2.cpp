@@ -5,11 +5,12 @@
 #include "Particle.h"
 
 #define VL6180X_ADDRESS 0x29 // Default I2C address for VL6180x
-#define BME_ADDRESS 0x76 // Default I2C address for BME68x
+#define BME_ADDRESS 0x77 // Default I2C address for BME68x
 #define BLYNK_AUTH_TOKEN "dz1SzlRRpOFotqyS5zmmKiDzg0uI62vL"
 
+
 PRODUCT_ID(1);
-PRODUCT_VERSION(3);
+PRODUCT_VERSION(4);
 
 VL6180x vl6180(VL6180X_ADDRESS);
 SCD30 scd30;
@@ -23,12 +24,13 @@ SYSTEM_MODE(AUTOMATIC);
 SerialLogHandler logHandler(LOG_LEVEL_INFO);
 
 // Time variables
-unsigned long previousMillis = 0;
-const unsigned long interval = 60000; // Interval in milliseconds
+const unsigned long interval = 50000; // Interval in milliseconds - 10 delays in total
+unsigned long previousMillis = interval;
 
 // Structure to hold sensor data
 struct SensorData {
   // VL6180
+  bool vl6180Available;
   int vl6180Range;
   float vl6180Ambient;
   // SCD30
@@ -69,19 +71,24 @@ void readSensors(SensorData &data) {
     data.bmeHum          = bmeData.humidity;
     data.bmePressure     = bmeData.pressure / 100.0; // Convert Pa to hPa if needed
     data.bmeGasResistance = bmeData.gas_resistance;
+    bme.setOpMode(BME68X_FORCED_MODE);
   }
 }
 
 // Function to print sensor data to Serial Monitor
 void printData(const SensorData &data) {
   // VL6180
-  Serial.print("VL6180 Ambient: ");
-  Serial.print(data.vl6180Ambient);
-  Serial.println(" lux");
-  
-  Serial.print("VL6180 Range: ");
-  Serial.print(static_cast<float>(data.vl6180Range));
-  Serial.println(" mm");
+  if(data.vl6180Available){
+    Serial.print("VL6180 Ambient: ");
+    Serial.print(data.vl6180Ambient);
+    Serial.println(" lux");
+    
+    Serial.print("VL6180 Range: ");
+    Serial.print(static_cast<float>(data.vl6180Range));
+    Serial.println(" mm");
+  } else {
+    Serial.println("VL6180 Data not available");
+  }
 
   // SCD30
   if (data.scd30Available) {
@@ -117,9 +124,14 @@ void publishDataJSON(const SensorData &data) {
   JSONBufferWriter writer(jsonBuffer, sizeof(jsonBuffer));
   
   writer.beginObject();
-    // VL6180 data
-    writer.name("vl6180Ambient").value(data.vl6180Ambient);
-    writer.name("vl6180Range").value(data.vl6180Range);
+    if (data.vl6180Available) {
+      // VL6180 data
+      writer.name("vl6180Ambient").value(data.vl6180Ambient);
+      writer.name("vl6180Range").value(data.vl6180Range);
+    }
+    else {
+      writer.name("vl6180Data").value("Not available");
+    }
     
     // SCD30 data
     if (data.scd30Available) {
@@ -139,39 +151,102 @@ void publishDataJSON(const SensorData &data) {
     } else {
       writer.name("bme68xData").value("Not available");
     }
+
+    writer.name("BLYNK_AUTH_TOKEN").value(BLYNK_AUTH_TOKEN);
+
   writer.endObject();
 
   Particle.publish("measurement", writer.buffer());
 }
 
 void publishData(const SensorData &data) {
-  char eventData[20] = {0};
 
-  Particle.publish("BLYNK_AUTH_TOKEN", String(BLYNK_AUTH_TOKEN), PRIVATE);
-
-
-  sprintf(eventData, "%.2f", data.vl6180Ambient);
-  Particle.publish("meas_vl6180Ambient", eventData, PRIVATE);
-  sprintf(eventData, "%d", data.vl6180Range);
-  Particle.publish("meas_vl6180Range", eventData, PRIVATE);
+  Particle.publish("BLYNK_AUTH_TOKEN", BLYNK_AUTH_TOKEN, PRIVATE);
+  delay(1000);
+  Particle.publish("meas_vl6180Ambient", String(data.vl6180Ambient, 2), PRIVATE);
+  delay(1000);
+  Particle.publish("meas_vl6180Range", String(data.vl6180Range), PRIVATE);
   
   if (data.scd30Available) {
-    sprintf(eventData, "%.2f", data.scd30CO2);
-    Particle.publish("meas_scd30CO2", eventData, PRIVATE);
-    sprintf(eventData, "%.2f", data.scd30Temp);
-    Particle.publish("meas_scd30Temperature", eventData, PRIVATE);
-    sprintf(eventData, "%.2f", data.scd30Hum);
-    Particle.publish("meas_scd30Humidity", eventData, PRIVATE);
+    delay(1000);
+    Particle.publish("meas_scd30CO2", String(data.scd30CO2,2), PRIVATE);
+    delay(1000);
+    Particle.publish("meas_scd30Temp", String(data.scd30Temp,2), PRIVATE);
+    delay(1000);
+    Particle.publish("meas_scd30Hum", String(data.scd30Hum,2), PRIVATE);
   }
 
   if (data.bmeAvailable) {
-    sprintf(eventData, "%.2f", data.bmeTemp);
-    Particle.publish("meas_bme68xTemperature", eventData, PRIVATE);
-    sprintf(eventData, "%.2f", data.bmeHum);
-    Particle.publish("meas_bme68xHumidity", eventData, PRIVATE);
-    sprintf(eventData, "%.2f", data.bmePressure);
-    Particle.publish("meas_bme68xPressure", eventData, PRIVATE);
-    // Particle.publish("bme68xGasResistance", String(data.bmeGasResistance), PRIVATE);
+    delay(1000);
+    Particle.publish("meas_bme68xTemp", String(data.bmeTemp,2), PRIVATE);
+    delay(1000);
+    Particle.publish("meas_bme68xHum", String(data.bmeHum,2), PRIVATE);
+    delay(1000);
+    Particle.publish("meas_bme68xPress", String(data.bmePressure,2), PRIVATE);
+    delay(1000);
+    Particle.publish("bme68xGasResistance", String(data.bmeGasResistance, 2), PRIVATE);
+    delay(1000);
+  }
+}
+
+void init_sensors() {
+
+  // Initialize VL6180
+  if(vl6180.VL6180xInit() == 0){
+    Serial.println("VL6180 Initialized");
+    Log.info("VL6180 Initialized");
+    sensorData.vl6180Available = true;
+
+    vl6180.VL6180xDefautSettings();
+    Serial.println("VL6180 Default Settings Applied");
+    Log.info("VL6180 Default Settings Applied");
+  }
+  else{
+    sensorData.vl6180Available = false;
+    Serial.println("FAILED TO INITALIZE VL6180"); //Initialize device and check for errors
+    Log.error("VL6180 Initialization failed");
+  }
+
+  // Initialize SCD30
+  if (scd30.begin())
+  {
+    sensorData.scd30Available = true;
+    Serial.println("SCD30 Initialized");
+    Log.info("SCD30 Initialized");
+  }
+  else
+  {
+    sensorData.scd30Available = false;
+    Serial.println("Failed to detect and initialize SCD30!");
+    Log.error("SCD30 Initialization failed");
+  }
+
+
+  // Initialize BME68x
+  bme.begin(BME_ADDRESS, Wire); // Initialize BME68x with I2C address and Wire object
+  if(bme.checkStatus())
+	{
+		if (bme.checkStatus() == BME68X_ERROR)
+		{
+			Serial.println("Sensor error:" + bme.statusString());
+      Log.error("BME68x Initialization failed:" + bme.statusString());
+			return;
+		}
+		else if (bme.checkStatus() == BME68X_WARNING)
+		{
+			Serial.println("Sensor Warning:" + bme.statusString());
+      Log.warn("BME68x Warning:" + bme.statusString());
+		}
+	}
+  else{
+    /* Set the default configuration for temperature, pressure and humidity */
+    bme.setTPH();
+    /* Set the heater configuration to 300 deg C for 100ms for Forced mode */
+    bme.setHeaterProf(300, 100);
+    bme.setOpMode(BME68X_FORCED_MODE);
+    sensorData.bmeAvailable = true;
+    Serial.println("BME68x Initialized");
+    Log.info("BME68x Initialized");
   }
 }
 
@@ -179,28 +254,9 @@ void setup() {
 
   Serial.begin(115200);
   Wire.begin();
-
-  // Initialize VL6180
-  if(vl6180.VL6180xInit() != 0){
-    Serial.println("FAILED TO INITALIZE VL6180"); //Initialize device and check for errors
-  }; 
-  vl6180.VL6180xDefautSettings();
-
-
-  // Initialize SCD30
-  if (!scd30.begin()) {
-    Serial.println("Failed to detect and initialize SCD30!");
-    while (1);
-  }
-
-
-  // Initialize BME68x
-  bme.begin(BME_ADDRESS, Wire); // Initialize BME68x with I2C address and Wire object
-	/* Set the default configuration for temperature, pressure and humidity */
-	bme.setTPH();
-	/* Set the heater configuration to 300 deg C for 100ms for Forced mode */
-	bme.setHeaterProf(300, 100);
-
+  delay(500);
+  Log.info("Starting sensor setup...");
+  init_sensors();
   Log.info("Setup has finished!");
 }
 
@@ -216,6 +272,7 @@ void loop() {
     printData(sensorData);
 
     // Publish sensor readings to Particle Cloud
-    publishData(sensorData);
+    publishDataJSON(sensorData);
+    Log.info("Running loop...");
   }
 }
