@@ -6,11 +6,9 @@
 
 #define VL6180X_ADDRESS 0x29 // Default I2C address for VL6180x
 #define BME_ADDRESS 0x77 // Default I2C address for BME68x
-#define BLYNK_AUTH_TOKEN "dz1SzlRRpOFotqyS5zmmKiDzg0uI62vL"
-
 
 PRODUCT_ID(1);
-PRODUCT_VERSION(4);
+PRODUCT_VERSION(5);
 
 VL6180x vl6180(VL6180X_ADDRESS);
 SCD30 scd30;
@@ -22,10 +20,14 @@ SYSTEM_MODE(AUTOMATIC);
 // Show system, cloud connectivity, and application logs over USB
 // View logs with CLI using 'particle serial monitor --follow'
 SerialLogHandler logHandler(LOG_LEVEL_INFO);
+SystemSleepConfiguration config;
 
 // Time variables
-const unsigned long interval = 50000; // Interval in milliseconds - 10 delays in total
-unsigned long previousMillis = interval;
+unsigned long refresh_rate_seconds = 60; // in seconds
+const unsigned long sec_to_millis = 1 * 1000; // in milliseconds
+unsigned long refresh_rate_ms = refresh_rate_seconds * sec_to_millis; // Last time sensors were refreshed
+unsigned long currentMillis = 0; // Current time in milliseconds
+unsigned long previousMillis = refresh_rate_ms; // Initialize to the refresh rate in milliseconds
 
 // Structure to hold sensor data
 struct SensorData {
@@ -52,7 +54,7 @@ SensorData sensorData;
 void readSensors(SensorData &data) {
   // VL6180
   data.vl6180Range = vl6180.getDistance();
-  data.vl6180Ambient = vl6180.getAmbientLight(GAIN_1);
+  data.vl6180Ambient = vl6180.getAmbientLight(GAIN_5);
 
   // SCD30
   data.scd30Available = scd30.dataAvailable();
@@ -126,11 +128,12 @@ void publishDataJSON(const SensorData &data) {
   writer.beginObject();
     if (data.vl6180Available) {
       // VL6180 data
-      writer.name("vl6180Ambient").value(data.vl6180Ambient);
+      writer.name("vl6180Lux").value(data.vl6180Ambient);
       writer.name("vl6180Range").value(data.vl6180Range);
     }
     else {
-      writer.name("vl6180Data").value("Not available");
+      writer.name("vl6180Lux").nullValue();
+      writer.name("vl6180Range").nullValue();
     }
     
     // SCD30 data
@@ -138,8 +141,11 @@ void publishDataJSON(const SensorData &data) {
       writer.name("scd30CO2").value(data.scd30CO2);
       writer.name("scd30Temperature").value(data.scd30Temp);
       writer.name("scd30Humidity").value(data.scd30Hum);
-    } else {
-      writer.name("scd30Data").value("Not available");
+    }
+    else {
+      writer.name("scd30CO2").nullValue();
+      writer.name("scd30Temperature").nullValue();
+      writer.name("scd30Humidity").nullValue();
     }
     
     // BME68x data
@@ -148,45 +154,17 @@ void publishDataJSON(const SensorData &data) {
       writer.name("bme68xHumidity").value(data.bmeHum);
       writer.name("bme68xPressure").value(data.bmePressure);
       writer.name("bme68xGasResistance").value(data.bmeGasResistance);
-    } else {
-      writer.name("bme68xData").value("Not available");
     }
-
-    writer.name("BLYNK_AUTH_TOKEN").value(BLYNK_AUTH_TOKEN);
+    else {
+      writer.name("bme68xTemperature").nullValue();
+      writer.name("bme68xHumidity").nullValue();
+      writer.name("bme68xPressure").nullValue();
+      writer.name("bme68xGasResistance").nullValue();
+    }
 
   writer.endObject();
 
   Particle.publish("measurement", writer.buffer());
-}
-
-void publishData(const SensorData &data) {
-
-  Particle.publish("BLYNK_AUTH_TOKEN", BLYNK_AUTH_TOKEN, PRIVATE);
-  delay(1000);
-  Particle.publish("meas_vl6180Ambient", String(data.vl6180Ambient, 2), PRIVATE);
-  delay(1000);
-  Particle.publish("meas_vl6180Range", String(data.vl6180Range), PRIVATE);
-  
-  if (data.scd30Available) {
-    delay(1000);
-    Particle.publish("meas_scd30CO2", String(data.scd30CO2,2), PRIVATE);
-    delay(1000);
-    Particle.publish("meas_scd30Temp", String(data.scd30Temp,2), PRIVATE);
-    delay(1000);
-    Particle.publish("meas_scd30Hum", String(data.scd30Hum,2), PRIVATE);
-  }
-
-  if (data.bmeAvailable) {
-    delay(1000);
-    Particle.publish("meas_bme68xTemp", String(data.bmeTemp,2), PRIVATE);
-    delay(1000);
-    Particle.publish("meas_bme68xHum", String(data.bmeHum,2), PRIVATE);
-    delay(1000);
-    Particle.publish("meas_bme68xPress", String(data.bmePressure,2), PRIVATE);
-    delay(1000);
-    Particle.publish("bme68xGasResistance", String(data.bmeGasResistance, 2), PRIVATE);
-    delay(1000);
-  }
 }
 
 void init_sensors() {
@@ -250,7 +228,30 @@ void init_sensors() {
   }
 }
 
+void config_sleep() {
+  // Configure the device to sleep after publishing
+  config.mode(SystemSleepMode::NONE)
+    .duration((system_tick_t) refresh_rate_seconds*sec_to_millis); // Sleep for refresh_rate_seconds
+}
+
+bool setRefreshRate(String command) {
+  // Parse the command to set the refresh rate
+  unsigned long newRate = command.toInt();
+  if (newRate > 0) {
+    refresh_rate_seconds = newRate;
+    refresh_rate_ms = refresh_rate_seconds * sec_to_millis;
+    // config_sleep(); // Reconfigure sleep with the new rate
+    Log.info("Refresh rate set to %lu seconds", refresh_rate_seconds);
+    return true;
+  } else {
+    Log.error("Invalid refresh rate: %s", command.c_str());
+    return false;
+  }
+}
+
 void setup() {
+  Particle.variable("refresh_rate_seconds", refresh_rate_seconds);
+  Particle.function("set_refresh_rate", setRefreshRate);
 
   Serial.begin(115200);
   Wire.begin();
@@ -258,21 +259,25 @@ void setup() {
   Log.info("Starting sensor setup...");
   init_sensors();
   Log.info("Setup has finished!");
+  config_sleep();
+  
 }
 
 void loop() {
   unsigned long currentMillis = millis();
-  if (currentMillis - previousMillis >= interval) {
+  if (currentMillis - previousMillis >= refresh_rate_ms) {
     previousMillis = currentMillis;
-
     // Poll sensors only once
     readSensors(sensorData);
 
     // Print results locally
-    printData(sensorData);
+    // printData(sensorData);q
 
     // Publish sensor readings to Particle Cloud
     publishDataJSON(sensorData);
     Log.info("Running loop...");
+    
+    // System.sleep(config);
   }
+
 }
